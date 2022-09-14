@@ -1,0 +1,11 @@
+Version 0.0.1
+
+Example notebook available in ETC_grism_notebooks
+Please read the warning!
+
+WARNING: This is the very first version (0.0.1) of the grism ETC, and a lot of improvement is still needed. The current version demonstrates that the overall product is "working" (and how to use it) but many of the specification files are far from final and current results should be taken with a lot of caution.
+
+Requirements are: "numpy", "matplotlib", "astropy", "spectres", "h5py", "fsps".
+
+Once requirements have been installed and folder downloaded, install the grim ETC simply with:
+> python setup.py install
