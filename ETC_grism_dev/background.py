@@ -20,7 +20,7 @@ GEOCORONAL_LINEWIDTH = 0.023  # angstroms
 #SKY_BACKGROUND = {"uv": 26.08, "u": 23.74, "g": 22.60}  # AB mag/arcsec^2
 sky_background_mag = {"uv": 27.7831, "u": 24.2583, "g": 22.6063}  # AB mag/arcsec^2
 sky_background_flam = {"uv": 1.7186261475789375e-19, "u": 1.835935409219377e-18, "g": 4.452212822832222e-18} #flam/arcsec^2
-sky_background_countrate = {}
+sky_background_countrate = {} #e-/s
 
 # (Teledyne e2v CMOS detector)
 # Dark current is 0.01 electrons/s/pixel at -50°C and halves for every reduction of 5-6°C.

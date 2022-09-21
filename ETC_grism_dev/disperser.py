@@ -93,6 +93,8 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
 
     #get filter transmission
     filter_transmission = ascii.read(utils.ETC_GRISM_HOME+'files/passbands/passband_castor.'+grism_channel)
+    #get full grism throughtput
+    grism_throughtput = ascii.read(utils.ETC_GRISM_HOME+'files/grism_files/castor_grism_efficiency_.'+grism_channel+'.txt')
     #get grism_dispersion
     #grism_dispersion = ascii.read(utils.ETC_GRISM_HOME+'files/grism_files/grism_dispersion_'+grism_channel+'_extrap.txt')
     grism_dispersion = ascii.read(utils.ETC_GRISM_HOME+'files/grism_files/grism_dispersion_'+grism_channel+'.txt')
@@ -123,19 +125,26 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
     #grism offsets wrt direct imaging
     y_offset = int((nb_rows_grism - nb_rows_img) / 2) #in pixels
     #arbitrary offset in dispersion direction
-    x_offset = 0  #in pixels
+    x_offset = 10  #in pixels
 
-    #Multiply spectrum with filter response curve and grism efficiency curve
-    wave, flux = source_spectrum
-    grid_ftrans = np.interp(wave, filter_transmission['col1']*1e4, filter_transmission['col2'])
-    flux *= grid_ftrans
-
-    #Use dummy grism_efficiency for now (flat 25% transmission)
-    grism_efficiency = 0.25
-    flux *= grism_efficiency
+        #NOW USING FULL GRISM THROUGHTPUT
+        #    #Multiply spectrum with filter response curve and grism efficiency curve
+        #    wave, flux = source_spectrum
+        #    grid_ftrans = np.interp(wave, filter_transmission['col1']*1e4, filter_transmission['col2'])
+        #    flux *= grid_ftrans
+        #
+        #    #Use dummy grism_efficiency for now (flat 25% transmission)
+        #    grism_efficiency = 0.25
+        #    flux *= grism_efficiency
+    #Multiply spectrum with full grism throughtput
+    wave, flux = np.copy(source_spectrum)
+    wavelength_key = grism_throughtput.keys()[0]
+    thput_key = grism_throughtput.keys()[1]
+    grid_gthput = np.interp(wave, grism_throughtput[wavelength_key]*10, 10**grism_throughtput[thput_key])
+    flux *= grid_gthput
 
     #Resample spectrum to pixel dispersion
-    #Assume pixel 1 is 3000 Angstrom for u channel and 1500 Angstrom for uv channel
+    #Pixel 1 corresponds to 3000 Angstrom for u channel and 1500 Angstrom for uv channel
     if grism_channel=="u":
         wave_zp = 3000
     if grism_channel=="uv":
@@ -143,9 +152,18 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
     wavelength_array = np.array([wave_zp+np.sum(grism_dispersion['col2'][:i]*10) for i in range(len(grism_dispersion['col2']))])
     flux_resamp = spectres.spectres(wavelength_array, wave, flux, fill=np.nan)
 
-    plt.plot(wave,flux,'-k')
-    plt.plot(wavelength_array,flux_resamp+1e-19,'--r')
-    plt.show()
+    if check:
+        #show 1D spectrum as seen "on detector"
+        plt.plot(source_spectrum[0],source_spectrum[1],'-k', label='Spectrum')
+        plt.plot(wavelength_array,flux_resamp,'-r', ds='steps-mid', label='Spectrum*Throughtput*Dispersion')
+        plt.xlim(min(wavelength_array)*0.9, max(wavelength_array)*1.1)
+        norm_y = 1.1*max(source_spectrum[1][(source_spectrum[0]>plt.gca().get_xlim()[0]) & (source_spectrum[0]<plt.gca().get_xlim()[1])])
+        plt.ylim(0, norm_y)
+        plt.plot(grism_throughtput[wavelength_key]*10, 10**grism_throughtput[thput_key] * norm_y, '-', color='grey', label='End-to-end grism throughtput', zorder=-1)
+        plt.xlabel('Wavelength (angstroms)')
+        plt.ylabel('Flux (ergs/cm2/s/A)')
+        plt.legend()
+        plt.show()
 
     #Make psf profile irradiance spectrum array.
     psf_profile_pix_oversampled = grism_psf_profile['col2']
@@ -182,13 +200,17 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
 
         self.grism_box[y_start:y_stop, x_indice:x_stop] += spectrum_spatial_scaled
 
-#        plt.figure()
-#        plt.imshow(self.grism_box, aspect="auto", interpolation="none")
-#        plt.show()
+#        if check:
+#            plt.figure()
+#            plt.imshow(self.grism_box, aspect="auto", interpolation="none")
+#            plt.show()
 
-    plt.figure()
-    plt.imshow(self.grism_box, aspect="auto", interpolation="none")
-    plt.show()
+    if check:
+        plt.figure()
+        plt.imshow(self.grism_box, aspect="auto", interpolation="none")
+        plt.xlabel('Pixels (Dispersion direction)')
+        plt.ylabel('Pixels (Spatial direction)')
+        plt.show()
 
     return 0
 

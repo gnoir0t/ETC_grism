@@ -8,15 +8,32 @@ from . import utils
 spectrum = (0, 0)
 fsps_sp = 0
 
-def spectrum_from_file():
+def spectrum_from_file(path_to_file, wave_key, flux_key, check=True):
     '''
     Grab spectrum from file.
+    ASSUMES SPECTRUM IS ALREADY REDSHIFTED.
+    Wavelength must be in angstroms.
+    Flux must be in ergs/cm2/s/A (normalized or not).
     '''
+
+    spec = ascii.read(path_to_file)
+    wave = spec[wave_key] #must be in angstroms
+    flux = spec[flux_key] #must be in ergs/cm2/s/A (normalized or not)
+
+    self.spectrum = (wave, flux)
+
+    if check:
+        plt.plot(wave, flux, '-k', label='Spectrum')
+        plt.xscale('log')
+        plt.xlabel('Wavelength (angstroms)')
+        plt.ylabel('Flux (ergs/cm2/s/A/Norm)')
+        plt.legend()
+        plt.show()
 
     return 0
 
 
-def spectrum_from_fsps(self, use_fsps_params_dict=True, fsps_params_dict={"tau": 1, "logzsol": 0, "dust2": 0.2}, fsps_age = 5, redshift=0):
+def spectrum_from_fsps(self, use_fsps_params_dict=True, fsps_params_dict={"tau": 1, "logzsol": 0, "dust2": 0.2}, fsps_age = 5, redshift=0, check=True):
     '''
     Generate spectrum from fsps
     '''
@@ -45,6 +62,14 @@ def spectrum_from_fsps(self, use_fsps_params_dict=True, fsps_params_dict={"tau":
         flux = flux / redshift_norm * scale
 
     self.spectrum = (wave, flux)
+
+    if check:
+        plt.plot(wave, flux, '-k', label='Full Spectrum')
+        plt.xscale('log')
+        plt.xlabel('Wavelength (angstroms)')
+        plt.ylabel('Mass-Normalized Flux (ergs/cm2/s/A/Mo)')
+        plt.legend()
+        plt.show()
 
     return 0
 
@@ -83,7 +108,7 @@ def normalize_spectrum(self, magnitude=23, filter_channel="u", check=True):
 
     #scaling
     scale = target_flux / flux_filter
-    print(target_flux, flux_filter, scale)
+    print("TARGET_FLAM, NON_NORM_FLAM, SCALING: ", target_flux, flux_filter, scale)
 
     #normalize and populate self.spectrumwith new wavelength grid and resampled flux
     flux_resamp *= scale
@@ -99,9 +124,12 @@ def normalize_spectrum(self, magnitude=23, filter_channel="u", check=True):
         print("NORM_FLAM, NORM_FNU, NORM_MAG: ", flux_filter, utils.flam_to_fnu(flux_filter, efflamb), utils.flam_to_mag(flux_filter, efflamb))
         print("TARGET_FLAM, TARGET_FNU, TARGET_MAG: ", target_flux, utils.mag_to_fnu(magnitude), magnitude)
 
-        plt.plot(wave, flux, 'k-')
-        plt.plot(efflamb, target_flux, 'or')
-        plt.plot(grid_wl, grid_ftrans*plt.gca().get_ylim()[1], '--b')
+        plt.plot(wave, flux, 'k-', label='Normalized Spectrum')
+        plt.plot(efflamb, target_flux, 'or', label='Target Photometry')
+        plt.plot(grid_wl, grid_ftrans*plt.gca().get_ylim()[1], '--b', label='Filter Curve')
+        plt.xlabel('Wavelength (angstroms)')
+        plt.ylabel('Flux (args/cm2/s/A)')
+        plt.legend()
         plt.show()
 
     return 0
