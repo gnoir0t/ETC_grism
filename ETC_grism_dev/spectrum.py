@@ -128,7 +128,7 @@ def normalize_spectrum(self, magnitude=23, filter_channel="u", check=True):
         plt.plot(efflamb, target_flux, 'or', label='Target Photometry')
         plt.plot(grid_wl, grid_ftrans*plt.gca().get_ylim()[1], '--b', label='Filter Curve')
         plt.xlabel('Wavelength (angstroms)')
-        plt.ylabel('Flux (args/cm2/s/A)')
+        plt.ylabel('Flux (ergs/cm2/s/A)')
         plt.legend()
         plt.show()
 

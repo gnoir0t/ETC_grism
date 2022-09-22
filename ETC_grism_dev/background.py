@@ -18,9 +18,12 @@ GEOCORONAL_LINEWIDTH = 0.023  # angstroms
 
 # Average sky background in each passband (Earthshine + zodiacal light)
 #SKY_BACKGROUND = {"uv": 26.08, "u": 23.74, "g": 22.60}  # AB mag/arcsec^2
-sky_background_mag = {"uv": 27.7831, "u": 24.2583, "g": 22.6063}  # AB mag/arcsec^2
-sky_background_flam = {"uv": 1.7186261475789375e-19, "u": 1.835935409219377e-18, "g": 4.452212822832222e-18} #flam/arcsec^2
-sky_background_countrate = {} #e-/s
+#sky_background_mag = {"uv": 27.7831, "u": 24.2583, "g": 22.6063}  # AB mag/arcsec^2
+#sky_background_flam = {"uv": 1.7186261475789375e-19, "u": 1.835935409219377e-18, "g": 4.452212822832222e-18} #flam/arcsec^2
+sky_background_mag = {"uv": 27.7831, "u": 24.2583}  # AB mag/arcsec^2
+sky_background_flam = {"uv": 1.7186261475789375e-19, "u": 1.835935409219377e-18} #flam/arcsec^2
+sky_background_countrate = {"uv": 0.0005811746388609881, "u": 0.01418100467547261} #e-/s
+#Imaging ETC gives sky_background countrates of uv: 0.0004768260787744109, and u: 0.01325195645039117. About the same as the method implemented here.
 
 # (Teledyne e2v CMOS detector)
 # Dark current is 0.01 electrons/s/pixel at -50°C and halves for every reduction of 5-6°C.
@@ -87,8 +90,7 @@ def recompute_sky_background(self, default_sky=True, user_zodi=None, user_earths
     self.sky_background_mag = {}
     self.sky_background_countrate = {}
 
-
-    for filter in ["uv", "u", "g"]:
+    for filter in ["uv", "u"]:
         filter_transmission_file = ascii.read(utils.ETC_GRISM_HOME+'files/passbands/passband_castor.'+filter)
         wave_transmission = filter_transmission_file['col1'] * 1e4 #in angtroms
         filter_transmission = filter_transmission_file['col2']
@@ -98,7 +100,7 @@ def recompute_sky_background(self, default_sky=True, user_zodi=None, user_earths
         grid_wl = np.arange(np.min(wave_transmission), np.max(wave_transmission)+dlambda, dlambda)
         grid_ftrans = np.interp(grid_wl, wave_transmission, filter_transmission)
 
-        #resample to wavelength grid of filter transmission curve
+        #resample sky background to wavelength grid of filter transmission curve
         flux_resamp = spectres.spectres(grid_wl, wave, flux, spec_errs=None, verbose=False)
 
         #flux as observed through filter
@@ -120,11 +122,32 @@ def recompute_sky_background(self, default_sky=True, user_zodi=None, user_earths
         #compute background in count rate (electrons per seconds)
         pix_scale = 0.1 #arcsec per pixel
 
-        #photflam is the inverse sensitivity (units: erg cm−2 Å−1 electron−1), as a function of wavelength.
-        #This is the scaling factor to transform an instrumental flux in units of electrons per second to a physical flux density, as a function of wavelength.
-        #FOR JWST NIRISS, PHOTFLAM = 1.9429001E-20 (ground calibration?) for pivot wavelength 15369.176 A.
-        photflam = 2e-19 #arbitrary, Needs to be updated with real value, depending on filter.
-        self.sky_background_countrate[filter] = flux_filter * photflam * pix_scale**2
+        #mirror area
+        mirror_diameter = 100 #cm
+        mirror_area = np.pi * 0.25 * mirror_diameter**2 #cm2
+
+#        #photflam is the inverse sensitivity (units: erg cm−2 Å−1 electron−1), as a function of wavelength.
+#        #This is the scaling factor to transform an instrumental flux in units of electrons per second to a physical flux density, as a function of wavelength.
+#        #FOR JWST NIRISS, PHOTFLAM = 1.9429001E-20 (ground calibration?) for pivot wavelength 15369.176 A.
+#        photflam = 2e-19 #arbitrary, Needs to be updated with real value, depending on filter.
+#        self.sky_background_countrate[filter] = flux_filter / photflam * pix_scale**2 #e-/s
+
+        #NEW METHOD, WITHOUT photflam
+        #DIRECTLY USES THE TOTAL SKY BACKGROUND SPECTRUM AND THE FULL GRISM THROUGHTPUT TO CONVERT FROM erg/cm2/s/A to e-/s
+        flam_to_photonlam = 5.0341165675427094e7 #factor to convert flux density (erg/cm2/s/A) to photon density (photons/cm2/s/A), with photon_density = flam_to_photonlam * lambda * flux_density
+        sky_photon_density = flam_to_photonlam * grid_wl * flux_resamp #in photons/cm2/s/A/arcsec**2
+        #get grism throughtput
+        grism_throughtput = ascii.read(utils.ETC_GRISM_HOME+'files/grism_files/castor_grism_efficiency_.'+filter+'.txt')
+        wavelength_key = grism_throughtput.keys()[0]
+        thput_key = grism_throughtput.keys()[1]
+        grid_gthput = np.interp(grid_wl, grism_throughtput[wavelength_key]*10, 10**grism_throughtput[thput_key])
+        #get sky background electron density
+        sky_electron_density = sky_photon_density * grid_gthput #"On detector" sky background in e-/cm2/s/A/arcsec**2
+        #get sky spectrum count rate
+        sky_countrate = sky_electron_density * mirror_area * pix_scale**2 * dlambda #e-/s
+        #each pixel sees the full spectrum when the sky is fully dispersed on the grism detector
+        sky_countrate_total = np.nansum(sky_countrate) #sky countrate in e-/s, seen in each pixel (should be the same as the imaging)
+        self.sky_background_countrate[filter] = sky_countrate_total
 
     return 0
 

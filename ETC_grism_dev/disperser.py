@@ -16,16 +16,13 @@ def expose(self, exposure_time=1000):
         
     '''
 
-    #assumes self.grism_box is in ergs/cm2/s/A
-    #self.integrated_grism_box is then in units of ergs/cm2/A
-    self.integrated_grism_box = self.grism_box * exposure_time
+    #self.grism_box is in e-/s
+    #self.integrated_grism_box_count is then in units of e-
+    self.integrated_grism_box_count = self.grism_box * exposure_time
 
-    #integrated_grism_box_count is in units of electron
-    #where inv_sens is the inverse sensitivity (units: erg cm−2 Å−1 electron−1), as a function of wavelength.
-    #This is the scaling factor to transform an instrumental flux in units of electrons per second to a physical flux density, as a function of wavelength.
-    #For imaging, the inverse_sensitivity is PHOTFLAM. FOR JWST NIRISS, PHOTFLAM = 1.9429001E-20 (ground calibration?) for pivot wavelength 15369.176 A.
-    inv_sens = 2e-19 #arbitrary, Needs to be updated with real array.
-    self.integrated_grism_box_count = self.integrated_grism_box / inv_sens
+    #NEW METHOD GIVES 'self.grism_box * exposure_time' IN e- (INSTEAD OF ergs/cm2/A BEFORE).
+    #NO LONGER NEEDED TO USE THE INVERSE SENSITIVITY FUNCTION.
+    #integrated_grism_box_count is in electrons
 
     return 0
 
@@ -136,12 +133,16 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
         #    #Use dummy grism_efficiency for now (flat 25% transmission)
         #    grism_efficiency = 0.25
         #    flux *= grism_efficiency
-    #Multiply spectrum with full grism throughtput
     wave, flux = np.copy(source_spectrum)
+    #Converts ergs/cm2/s/A to photons/cm2/s/A
+    flam_to_photonlam = 5.0341165675427094e7
+    spectrum_photon_density = flam_to_photonlam * wave * flux #in photons/cm2/s/A
+    #Multiply spectrum (in photons/cm2/s/A) with full grism throughtput to get e-/cm2/s/A
     wavelength_key = grism_throughtput.keys()[0]
     thput_key = grism_throughtput.keys()[1]
     grid_gthput = np.interp(wave, grism_throughtput[wavelength_key]*10, 10**grism_throughtput[thput_key])
-    flux *= grid_gthput
+    spectrum_electron_density = spectrum_photon_density * grid_gthput   #"On detector" spectrum in e-/cm2/s/A
+    flux = spectrum_electron_density
 
     #Resample spectrum to pixel dispersion
     #Pixel 1 corresponds to 3000 Angstrom for u channel and 1500 Angstrom for uv channel
@@ -154,8 +155,7 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
 
     if check:
         #show 1D spectrum as seen "on detector"
-        plt.plot(source_spectrum[0],source_spectrum[1],'-k', label='Spectrum')
-        plt.plot(wavelength_array,flux_resamp,'-r', ds='steps-mid', label='Spectrum*Throughtput*Dispersion')
+        plt.plot(source_spectrum[0],source_spectrum[1],'-k', label='Emitted Spectrum')
         plt.xlim(min(wavelength_array)*0.9, max(wavelength_array)*1.1)
         norm_y = 1.1*max(source_spectrum[1][(source_spectrum[0]>plt.gca().get_xlim()[0]) & (source_spectrum[0]<plt.gca().get_xlim()[1])])
         plt.ylim(0, norm_y)
@@ -163,9 +163,19 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
         plt.xlabel('Wavelength (angstroms)')
         plt.ylabel('Flux (ergs/cm2/s/A)')
         plt.legend()
+        plt.figure()
+        plt.plot(wavelength_array,flux_resamp,'-r', ds='steps-mid', label='"On Detector" Spectrum')
+        plt.xlim(min(wavelength_array)*0.9, max(wavelength_array)*1.1)
+        plt.xlabel('Wavelength (angstroms)')
+        plt.ylabel('"On detector" Electron Flux (e-/cm2/s/A)')
         plt.show()
 
-    #Make psf profile irradiance spectrum array.
+    #convert flux from electron flux densities (e-/cm2/s/A) to electron flux of e-/cm2/s (multiply by dispersion).
+    #This is done here to be able to convert flux densities to counts (electrons) during the exposure.
+    #If done at the exposure stage, then it complicates things as different wavelengths with different dispersions then overlap on the same pixels, which makes the conversion impracticle at this stage.
+    flux_resamp *= grism_dispersion['col2']*10 #in e-/cm2/s
+
+    #Make psf profile irradiance spectrum array. Currently assumes no PSF variation across the different grisms.
     psf_profile_pix_oversampled = grism_psf_profile['col2']
     psf_profile_pix = np.arange(np.min(psf_profile_pix_oversampled), np.max(psf_profile_pix_oversampled)+1, 1)
     psf_profile_oversampled = grism_psf_profile['col4']
@@ -205,9 +215,17 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
 #            plt.imshow(self.grism_box, aspect="auto", interpolation="none")
 #            plt.show()
 
+    #mirror area
+    mirror_diameter = 100 #cm
+    mirror_area = np.pi * 0.25 * mirror_diameter**2 #cm2
+
+    #Multiply by mirror area to get a count rate in e-/s
+    self.grism_box *= mirror_area
+
     if check:
         plt.figure()
         plt.imshow(self.grism_box, aspect="auto", interpolation="none")
+        plt.colorbar(label='"On detector" Count Rate (e-/s)')
         plt.xlabel('Pixels (Dispersion direction)')
         plt.ylabel('Pixels (Spatial direction)')
         plt.show()
