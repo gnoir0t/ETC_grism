@@ -8,7 +8,7 @@ from . import utils
 spectrum = (0, 0)
 fsps_sp = 0
 
-def spectrum_from_file(path_to_file, wave_key, flux_key, check=True):
+def spectrum_from_file(self, path_to_file, wave_key, flux_key, check=True):
     '''
     Grab spectrum from file.
     ASSUMES SPECTRUM IS ALREADY REDSHIFTED.
