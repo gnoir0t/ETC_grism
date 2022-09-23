@@ -10,3 +10,5 @@ Requirements are: "numpy", "matplotlib", "astropy", "spectres", "h5py", "fsps".
 
 Once requirements have been installed and folder downloaded (or git cloned), install the grism ETC simply with:
 > python setup.py install
+
+/!\ Before installing the ETC, modify the 'ETC_GRISM_HOME' variable located in 'utils.py'. It should be the absolute path to the 'ETC_grism_dev' folder on your machine.
