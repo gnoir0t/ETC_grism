@@ -8,17 +8,27 @@ from . import utils
 spectrum = (0, 0)
 fsps_sp = 0
 
-def spectrum_from_file(self, path_to_file, wave_key, flux_key, check=True):
+def spectrum_from_file(self, path_to_file, wave_key, flux_key, redshift=0, check=True):
     '''
     Grab spectrum from file.
-    ASSUMES SPECTRUM IS ALREADY REDSHIFTED.
     Wavelength must be in angstroms.
     Flux must be in ergs/cm2/s/A (normalized or not).
+    If a redshift>0 is provided, the spectrum is redshifted to that redshift.
     '''
 
     spec = ascii.read(path_to_file)
     wave = spec[wave_key] #must be in angstroms
     flux = spec[flux_key] #must be in ergs/cm2/s/A (normalized or not)
+
+    if redshift > 0:
+        #redshift the spectrum
+        wave *= (1+redshift)
+
+        scale = 1
+
+        dist_lum = cosmo.luminosity_distance(redshift).value * 3.08567758128e24 #in cm
+        redshift_norm = ((4*np.pi*dist_lum**2)*(1+redshift))
+        flux = flux / redshift_norm * scale
 
     self.spectrum = (wave, flux)
 
@@ -26,7 +36,7 @@ def spectrum_from_file(self, path_to_file, wave_key, flux_key, check=True):
         plt.plot(wave, flux, '-k', label='Spectrum')
         plt.xscale('log')
         plt.xlabel('Wavelength (angstroms)')
-        plt.ylabel('Flux (ergs/cm2/s/A/Norm)')
+        plt.ylabel('Flux (ergs/cm2/s/A)')
         plt.legend()
         plt.show()
 
