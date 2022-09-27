@@ -22,7 +22,7 @@ GEOCORONAL_LINEWIDTH = 0.023  # angstroms
 #sky_background_flam = {"uv": 1.7186261475789375e-19, "u": 1.835935409219377e-18, "g": 4.452212822832222e-18} #flam/arcsec^2
 sky_background_mag = {"uv": 27.7831, "u": 24.2583}  # AB mag/arcsec^2
 sky_background_flam = {"uv": 1.7186261475789375e-19, "u": 1.835935409219377e-18} #flam/arcsec^2
-sky_background_countrate = {"uv": 0.0005811746388609881, "u": 0.01418100467547261} #e-/s
+sky_background_countrate = {"uv": 0.0005811746388609881, "u": 0.01418100467547261} #e-/s /pix
 #Imaging ETC gives sky_background countrates of uv: 0.0004768260787744109, and u: 0.01325195645039117. About the same as the method implemented here.
 
 # (Teledyne e2v CMOS detector)
@@ -45,6 +45,7 @@ def tot_unif_noise(self, exposure_time, filter="uv", Nreads=1, Nbin=1):
     #Nreads: total number of read-outs
     #Nbin: the number of detector pixels binned to one read-out pixel when on-chip binning is used.
     #add_bkgrd_noise: additionnal noise, eg, HST: the background added using the post-flash option in e− pixel-1
+    #total_unif_noise is per pixel
 
     self.total_unif_noise = self.sky_background_countrate[filter] * exposure_time + self.dark_countrate * exposure_time + self.read_noise_count**2 * Nreads / Nbin + self.add_bkgrd_noise_count * Nreads
 

@@ -20,13 +20,17 @@ setup(
         "ETC_grism_dev.files",
         "ETC_grism_dev.files.grism_files",
         "ETC_grism_dev.files.passbands",
+        "ETC_grism_dev.files.sky_background",
+        "ETC_grism_dev.files.spectra"
     ],
     package_data={
-        "ETC_grism_dev.files.grism_files": ["*_profile_uv.txt", "*_dispersion_uv.txt", "*_dispersion_u.txt"],
-        "ETC_grism_dev.files.passbands": ["*.uv", "*.u", "*.g"]
+        "ETC_grism_dev.files.grism_files": ["*_profile_uv.txt", "*_dispersion_uv.txt", "*_dispersion_u.txt", "*_efficiency_uv.txt", "*_efficiency_u.txt"],
+        "ETC_grism_dev.files.passbands": ["*.uv", "*.u", "*.g"],
+        "ETC_grism_dev.files.sky_background": ["earthshine.fits", "zodi.fits"],
+        "ETC_grism_dev.files.spectra": ["fsps_quiescent.txt", "fsps_star_forming.txt"]
     },
     install_requires=["numpy", "matplotlib", "astropy", "spectres", "h5py", "fsps"],
     license="GPLv3",
     python_requires=">=3.9",
-    platforms=["MacOS"],  # only tested on Ubuntu. MacOS and Windows likely okay.
+    platforms=["MacOS"],  # only tested on MacOS.
 )
