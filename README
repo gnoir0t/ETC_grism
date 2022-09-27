@@ -5,10 +5,20 @@ Please read the warning!
 
 ## WARNING: This is the very first version (0.0.1) of the grism ETC, and improvement is still underway. The current version demonstrates how to use the tool but changes in the specification files or the tool itself may occur and current results should be taken with caution.
 
-Works with python 3.9.
+The tool has been built with python 3.9.12.
 Requirements are: "numpy", "matplotlib", "astropy", "spectres", "h5py", "fsps".
+The tool has been successfully tested with the following versions of the required packages:
+numpy 1.21.6
+matplotlib 3.5.1
+astropy 5.0.4
+spectres 2.1.1
+h5py 3.6.0
+fsps 0.4.0
+Installing higher, backward-compatible versions of the requirements should be fine as well.
+Note that the python version of FSPS has its own requirements, particularly having a fortran compiler and downloading the FSPS project files (see https://dfm.io/python-fsps/current/installation/).
 
-Once requirements have been installed and folder downloaded (or git cloned), install the grism ETC simply with:
+Once requirements have been installed and the ETC_grism folder downloaded (or git cloned), install the grism ETC simply with:
 > python setup.py install
+(If you have previously installed the imaging ETC - https://github.com/CASTOR-telescope/ETC -, this can be done within the same conda environment).
 
 /!\ Before installing the ETC, modify the 'ETC_GRISM_HOME' variable located in 'utils.py'. It should be the absolute path to the 'ETC_grism_dev' folder on your machine.
