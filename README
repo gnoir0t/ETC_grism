@@ -22,3 +22,10 @@ Once requirements have been installed and the ETC_grism folder downloaded (or gi
 (If you have previously installed the imaging ETC - https://github.com/CASTOR-telescope/ETC -, this can be done within the same conda environment).
 
 /!\ Before installing the ETC, modify the 'ETC_GRISM_HOME' variable located in 'utils.py'. It should be the absolute path to the 'ETC_grism_dev' folder on your machine.
+
+
+--
+Working version of the ETC available on google colab:
+	- With all dependencies including fsps: https://colab.research.google.com/drive/1FthdKL6SyssaCnQOp2AdbFmaHSLGwlwc?usp=sharing
+	- And without fsps: https://colab.research.google.com/drive/1MDiHeFz-h_kbxTp-dV6ZhsewvaR6vk8P?usp=sharing
+
