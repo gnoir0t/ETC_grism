@@ -19,7 +19,7 @@ Note that the python version of FSPS has its own requirements, particularly havi
 
 Once requirements have been installed and the ETC_grism folder downloaded (or git cloned), install the grism ETC simply with:
 > python setup.py install
-(If you have previously installed the imaging ETC - https://github.com/CASTOR-telescope/ETC -, this can be done within the same conda environment).
+(If you have previously installed the imaging ETC - https://github.com/CASTOR-telescope/ETC - in a conda environment, this can be done within the same conda environment).
 
 /!\ Before installing the ETC, modify the 'ETC_GRISM_HOME' variable located in 'utils.py'. It should be the absolute path to the 'ETC_grism_dev' folder on your machine.
 
