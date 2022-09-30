@@ -29,3 +29,15 @@ Working version of the ETC available on google colab:
 	- With all dependencies including fsps: https://colab.research.google.com/drive/1FthdKL6SyssaCnQOp2AdbFmaHSLGwlwc?usp=sharing
 	- And without fsps: https://colab.research.google.com/drive/1MDiHeFz-h_kbxTp-dV6ZhsewvaR6vk8P?usp=sharing
 
+
+--
+Change log:
+
+2022-09-30:
+Input spectra can now be defined over shorter wavelength ranges than the filter transmission curves, values of 0 will simply be assumed outside the wavelength ranges.
+
+--
+To do:
+Add geocoronal lines (not implemented yet, as a work around, you can add your own geocoronal lines to either the 'zodi.fits' or 'earthshine.fits' spectra, this will take them into account in the total sky background. Note that the 'zodi.fits' and 'earthshine.fits' spectra are in units of ergs/cm2/s/A/arcsec2).
+
+

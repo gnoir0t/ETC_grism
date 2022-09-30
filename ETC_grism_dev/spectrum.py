@@ -100,8 +100,9 @@ def normalize_spectrum(self, magnitude=23, filter_channel="u", check=True):
 
     wave, flux = self.spectrum
 
-    #resample to wavelength grid of filter transmission curve
-    flux_resamp = spectres.spectres(grid_wl, wave, flux, spec_errs=None, verbose=False)
+    #resample to wavelength grid of filter transmission curve.
+    #If spectrum doesn't fully overlap with filter transmission curve, values of 0 are assumed.
+    flux_resamp = spectres.spectres(grid_wl, wave, flux, spec_errs=None, fill=0, verbose=False)
 
     #flux as observed through filter
     flux_numerator_filter = np.sum(flux_resamp * grid_ftrans * grid_wl * dlambda)

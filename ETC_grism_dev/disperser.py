@@ -151,7 +151,8 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
     if grism_channel=="uv":
         wave_zp = 1500
     wavelength_array = np.array([wave_zp+np.sum(grism_dispersion['col2'][:i]*10) for i in range(len(grism_dispersion['col2']))])
-    flux_resamp = spectres.spectres(wavelength_array, wave, flux, fill=np.nan)
+    #If spectrum doesn't fully overlap with wavelength_array, values of 0 are assumed.
+    flux_resamp = spectres.spectres(wavelength_array, wave, flux, fill=0)
 
     if check:
         #show 1D spectrum as seen "on detector"

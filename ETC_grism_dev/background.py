@@ -102,7 +102,8 @@ def recompute_sky_background(self, default_sky=True, user_zodi=None, user_earths
         grid_ftrans = np.interp(grid_wl, wave_transmission, filter_transmission)
 
         #resample sky background to wavelength grid of filter transmission curve
-        flux_resamp = spectres.spectres(grid_wl, wave, flux, spec_errs=None, verbose=False)
+        #If spectrum doesn't fully overlap with wavelength_array, values of 0 are assumed.
+        flux_resamp = spectres.spectres(grid_wl, wave, flux, spec_errs=None, fill=0, verbose=False)
 
         #flux as observed through filter
         flux_numerator_filter = np.sum(flux_resamp * grid_ftrans * grid_wl * dlambda)
