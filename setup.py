@@ -7,7 +7,7 @@ from setuptools import setup
 
 setup(
     name="ETC_grism_dev",
-    version="0.0.1",  # see semantic versioning (<https://semver.org/spec/v2.0.0.html>)
+    version="0.0.2",  # see semantic versioning (<https://semver.org/spec/v2.0.0.html>)
     description="CASTOR GRISM Exposure Time Calculator (ETC)",
 #    long_description=long_description,
 #    url="",
@@ -26,7 +26,7 @@ setup(
     package_data={
         "ETC_grism_dev.files.grism_files": ["*_profile_uv.txt", "*_dispersion_uv.txt", "*_dispersion_u.txt", "*_efficiency_uv.txt", "*_efficiency_u.txt"],
         "ETC_grism_dev.files.passbands": ["*.uv", "*.u", "*.g"],
-        "ETC_grism_dev.files.sky_background": ["earthshine.fits", "zodi.fits"],
+        "ETC_grism_dev.files.sky_background": ["earthshine.fits", "zodi.fits", "geo_low.fits", "geo_avg.fits", "geo_high.fits"],
         "ETC_grism_dev.files.spectra": ["fsps_quiescent.txt", "fsps_star_forming.txt"]
     },
     install_requires=["numpy", "matplotlib", "astropy", "spectres", "h5py", "fsps"],

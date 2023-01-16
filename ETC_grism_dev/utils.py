@@ -70,3 +70,10 @@ def flam_to_mag(f_lambda, efflamb):
     mag = fnu_to_mag(fnu)
 
     return mag
+
+
+def gaussian(x, m, sigma):
+    """ Return the normalized Gaussian with standard deviation sigma. """
+    c = np.sqrt(2 * np.pi)
+    return np.exp(-0.5 * ((x-m) / sigma)**2) / sigma / c
+

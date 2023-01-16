@@ -8,3 +8,5 @@ P.S. The data are from:
 <https://github.com/spacetelescope/pysynphot/blob/master/pysynphot/data/generic/Zodi.fits>
 and
 <https://github.com/spacetelescope/pysynphot/blob/master/pysynphot/data/generic/earthshine.fits>.
+
+The geocoronal spectra ('geo_high.fits', 'geo_avg.fits', and 'geo_low.fits') have been generated using the 'generate_geo_spectra()' function in 'background.py'. It uses the line intensities as defined in <https://hst-docs.stsci.edu/stisihb/chapter-6-exposure-time-calculations/6-6-tabular-sky-backgrounds> and assume they are gaussians. Note however that they are not resolved at the sampling of the generated spectra (dlambda=1 angstrom). Units are erg/cm**2/s/A/arcsec**2 (equivalent to erg/cm**2/s/arcsec**2) given the dlambda=1 angstrom sampling.
