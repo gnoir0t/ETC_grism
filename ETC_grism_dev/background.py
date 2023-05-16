@@ -30,7 +30,7 @@ sky_background_countrate = {"uv": 0.0005811746388609881, "u": 0.0141810046754726
 sky_background_mag = {'uv': 25.141716564724156, 'u': 24.25825403868489} # AB mag/arcsec^2
 sky_background_flam = {'uv': 1.9576700516350905e-18, 'u': 1.835936959124605e-18} #flam/arcsec^2
 sky_background_countrate = {'uv': 0.004671128308536505, 'u': 0.014181008896939849} #e-/s /pix
-# Average geocoronal is negligible in the U band, but quite significant in the UV, including the contribution from very short wavelength lines (Lya, OI, OI]).
+# Average geocoronal is negligible in the U band, but quite significant in the UV, including the (negligible?) contribution from very short wavelength lines (Lya, OI, OI]).
 
 # (Teledyne e2v CMOS detector)
 # Dark current is 0.01 electrons/s/pixel at -50°C and halves for every reduction of 5-6°C.

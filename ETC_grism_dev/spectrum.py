@@ -33,6 +33,7 @@ def spectrum_from_file(self, path_to_file, wave_key, flux_key, redshift=0, check
     self.spectrum = (wave, flux)
 
     if check:
+        plt.figure()
         plt.plot(wave, flux, '-k', label='Spectrum')
         plt.xscale('log')
         plt.xlabel('Wavelength (angstroms)')
@@ -74,6 +75,7 @@ def spectrum_from_fsps(self, use_fsps_params_dict=True, fsps_params_dict={"tau":
     self.spectrum = (wave, flux)
 
     if check:
+        plt.figure()
         plt.plot(wave, flux, '-k', label='Full Spectrum')
         plt.xscale('log')
         plt.xlabel('Wavelength (angstroms)')
@@ -135,6 +137,7 @@ def normalize_spectrum(self, magnitude=23, filter_channel="u", check=True):
         print("NORM_FLAM, NORM_FNU, NORM_MAG: ", flux_filter, utils.flam_to_fnu(flux_filter, efflamb), utils.flam_to_mag(flux_filter, efflamb))
         print("TARGET_FLAM, TARGET_FNU, TARGET_MAG: ", target_flux, utils.mag_to_fnu(magnitude), magnitude)
 
+        plt.figure()
         plt.plot(wave, flux, 'k-', label='Normalized Spectrum')
         plt.plot(efflamb, target_flux, 'or', label='Target Photometry')
         plt.plot(grid_wl, grid_ftrans*plt.gca().get_ylim()[1], '--b', label='Filter Curve')

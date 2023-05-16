@@ -8,6 +8,7 @@ __all__ =   [
                 "spectrum",
                 "disperser",
                 "outputs",
+                "fitting",
                 "utils"
             ]
 
@@ -16,4 +17,5 @@ from . import source
 from . import spectrum
 from . import disperser
 from . import outputs
+from . import fitting
 from . import utils

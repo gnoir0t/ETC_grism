@@ -122,7 +122,7 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
     #grism offsets wrt direct imaging
     y_offset = int((nb_rows_grism - nb_rows_img) / 2) #in pixels
     #arbitrary offset in dispersion direction
-    x_offset = 10  #in pixels
+    x_offset = 0  #in pixels
 
         #NOW USING FULL GRISM THROUGHTPUT
         #    #Multiply spectrum with filter response curve and grism efficiency curve
@@ -150,12 +150,13 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
         wave_zp = 3000
     if grism_channel=="uv":
         wave_zp = 1500
-    wavelength_array = np.array([wave_zp+np.sum(grism_dispersion['col2'][:i]*10) for i in range(len(grism_dispersion['col2']))])
+    self.wavelength_array = np.array([wave_zp+np.sum(grism_dispersion['col2'][:i]*10) for i in range(len(grism_dispersion['col2']))])
     #If spectrum doesn't fully overlap with wavelength_array, values of 0 are assumed.
     flux_resamp = spectres.spectres(wavelength_array, wave, flux, fill=0)
 
     if check:
         #show 1D spectrum as seen "on detector"
+        plt.figure()
         plt.plot(source_spectrum[0],source_spectrum[1],'-k', label='Emitted Spectrum')
         plt.xlim(min(wavelength_array)*0.9, max(wavelength_array)*1.1)
         norm_y = 1.1*max(source_spectrum[1][(source_spectrum[0]>plt.gca().get_xlim()[0]) & (source_spectrum[0]<plt.gca().get_xlim()[1])])
@@ -232,21 +233,3 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
         plt.show()
 
     return 0
-
-
-
-
-#just a test to check if package works locally with the imports.
-def test():
-
-    ff = np.array([1,2,3,4,5])
-    print(ff)
-
-    spectrum.fsps_sp.params['tau'] = 0.2
-
-    wave, spec = spectrum.fsps_sp.get_spectrum(tage=10, peraa=True)
-
-    plt.figure()
-    plt.plot(wave,spec, 'k-')
-    plt.xscale('log')
-    plt.show()
