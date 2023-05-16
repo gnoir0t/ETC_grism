@@ -33,11 +33,11 @@ Working version of the ETC available on google colab:
 --
 Change log:
 
-2023-16-05:
+2023-05-16:
 v0.3.0
 Added fitting module.
 
-2023-16-01:
+2023-01-16:
 v0.0.2
 Added geocoronal lines to the sky background. Three spectra with different line intensities are provided in the 'sky_background' folder. The user can choose between geo_intensity='high', 'avg', and 'low' when calling the recompute_sky_background() function (default is 'avg').
 Note: 'zodi.fits', 'earthshine.fits' and 'geo_*.fits' spectra are in units of ergs/cm2/s/A/arcsec2.
