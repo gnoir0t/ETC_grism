@@ -233,3 +233,59 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
         plt.show()
 
     return 0
+
+
+#function to disperse a full scene with multiple objects
+def observe_scene(self, scene_direct, scene_seg, spectra, grism_channel, exposure_time, check=True):
+    
+    #how many segmentation regions?
+    seg_regions = np.unique(scene_seg[scene_seg>0])
+    
+    #prepare grism scene
+    fov_grism = scene_direct.shape[1]
+    if scene_direct.shape[1] < 500:
+        fov_grism = 500 + scene_direct.shape[1]
+    self.grism_scene = np.zeros([fov_grism, fov_grism])
+    
+    #loop over each segmentation region
+    k=0
+    for seg_region in seg_regions:
+        #select region
+        region = scene_seg==seg_region
+        region_indexes = np.where(region)
+        
+        #make box around seg region
+        y_min = np.min(region_indexes[0])
+        y_max = np.max(region_indexes[0])
+        x_min = np.min(region_indexes[1])
+        x_max = np.max(region_indexes[1])
+        box_seg = scene_seg[y_min:y_max+1, x_min:x_max+1]
+        box_direct = scene_direct[y_min:y_max+1, x_min:x_max+1]
+        
+        if check==True:
+            plt.figure()
+            plt.imshow(np.log10(box_direct), origin='lower', interpolation='none', vmin=-1, vmax=1)
+            plt.show()
+            plt.figure()
+            plt.imshow(box_seg, origin='lower', interpolation='none')
+            plt.show()
+    
+        #disperse
+        disperse(self, source_image=box_direct, source_disperse_region=box_seg,
+                   source_spectrum=spectra[k], grism_channel=grism_channel, check=check)
+
+        #observe
+        expose(self, exposure_time=exposure_time)
+        grism_2d_box = self.integrated_grism_box_count
+        
+        #add trace to grism scene
+        x_start = int(np.median([x_min, x_max]))
+        x_end = x_start + grism_2d_box.shape[1]
+        y_gbox_start = int(grism_2d_box.shape[0] / 2) - int(box_seg.shape[0] / 2)
+        y_gbox_end = y_gbox_start + int(box_seg.shape[0])
+        self.grism_scene[y_min:y_max+1, x_start:x_end] += grism_2d_box[y_gbox_start:y_gbox_end]
+        
+        k+=1
+
+    return 0
+

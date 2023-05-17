@@ -7,7 +7,7 @@ from setuptools import setup
 
 setup(
     name="ETC_grism_dev",
-    version="0.3.0",  # see semantic versioning (<https://semver.org/spec/v2.0.0.html>)
+    version="0.4.0",  # see semantic versioning (<https://semver.org/spec/v2.0.0.html>)
     description="CASTOR GRISM Exposure Time Calculator (ETC)",
 #    long_description=long_description,
 #    url="",
