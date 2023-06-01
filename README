@@ -1,9 +1,9 @@
-Version 0.4.0
+Version 0.5.0
 
 Example notebooks available in ETC_grism_notebooks
 Please read the warning!
 
-## WARNING: This is an early version (0.4.0) of the grism ETC, and improvement is still underway. The current version demonstrates how to use the tool but changes in the specification files or the tool itself may occur and current results should be taken with caution.
+## WARNING: This is an early version (0.5.0) of the grism ETC, and improvement is still underway. The current version demonstrates how to use the tool but changes in the specification files or the tool itself may occur and current results should be taken with caution.
 
 The tool has been built with python 3.9.12.
 Requirements are: "numpy", "matplotlib", "astropy", "spectres", "h5py", "fsps".
@@ -32,8 +32,15 @@ Working version of the ETC available on google colab:
 
 	- v0.4.0 (S2D conference tutorial): https://colab.research.google.com/drive/1zEeN1pBjpDJzgcvNVLGY04KBR04Ezayq?usp=sharing
 
+	- v0.5.0 notebook showing full scene observation capabilities: https://github.com/gnoir0t/ETC_grism/tree/main/ETC_grism_notebooks/grism_etc_example_scene.ipynb
+
 --
 Change log:
+
+2023-06-01:
+v0.5.0
+Added function to create full grism scene observations (noiseless) with overlapping sources in the direct image.
+
 
 2023-05-17:
 v0.4.0

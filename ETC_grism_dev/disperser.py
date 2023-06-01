@@ -236,15 +236,16 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
 
 
 #function to disperse a full scene with multiple objects
-def observe_scene(self, scene_direct, scene_seg, spectra, grism_channel, exposure_time, check=True):
+def observe_scene(self, scene_direct, scene_seg, spectra, grism_channel, exposure_time, image_fov=False, check=True):
     
     #how many segmentation regions?
     seg_regions = np.unique(scene_seg[scene_seg>0])
     
     #prepare grism scene
     fov_grism = scene_direct.shape[1]
-    if scene_direct.shape[1] < 500:
-        fov_grism = 500 + scene_direct.shape[1]
+    #add 500 pixels in dispersion direction to fully disperse sources at the edge of the fov
+    #can be trimmed back to original image fov after.
+    fov_grism = 500 + scene_direct.shape[1]
     self.grism_scene = np.zeros([fov_grism, fov_grism])
     
     #loop over each segmentation region
@@ -287,5 +288,27 @@ def observe_scene(self, scene_direct, scene_seg, spectra, grism_channel, exposur
         
         k+=1
 
+    #trim fov back to original image fov?
+    if image_fov==True:
+        self.grism_scene = self.grism_scene[:scene_direct.shape[1], :scene_direct.shape[0]]
+
+    return 0
+
+
+#function to disperse a full scene with multiple objects overlapping in the direct imaging
+#It takes as input multi-dimentionnal "scene_direct", "scene_seg", and "spectra", each with non-overlapping sources/segmentations.
+#Other inputs same as "observe_scene()".
+def observe_scene_multi_dim(self, scene_direct, scene_seg, spectra, grism_channel, exposure_time, image_fov=False, check=True):
+
+    grism_scene_md = []
+
+    #loop over the dimantions
+    for scene_direct_i, scene_seg_i, spectra_i in zip(scene_direct, scene_seg, spectra):
+        #create scene for each dimension
+        observe_scene(self, scene_direct_i, scene_seg_i, spectra_i, grism_channel, exposure_time, image_fov=image_fov, check=check)
+        grism_scene_md.append(self.grism_scene)
+    
+    self.grism_scene_multi_dim = np.sum(grism_scene_md, axis=0)
+    
     return 0
 
