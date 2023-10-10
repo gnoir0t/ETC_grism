@@ -295,14 +295,41 @@ def observe_scene(self, scene_direct, scene_seg, spectra, grism_channel, exposur
     return 0
 
 
+#function to get associated noise map of a full scene with multiple objects
+def scene_noise(self, exposure_time=1000, filter="uv", Nreads=1, Nbin=1):
+    '''
+    Function to generate the total noise of a grism scene for a given integration time.
+
+    exposure_time
+        Exposure time in seconds.
+
+    Nreads: total number of read-outs (int).
+
+    Nbin: the number of detector pixels binned to one read-out pixel when on-chip binning is used (int).
+
+    '''
+
+    self.grism_scene_noise = np.zeros_like(self.grism_scene)
+
+    #compute the uniform background
+    background.tot_unif_noise(background, exposure_time=exposure_time, filter=filter, Nreads=Nreads, Nbin=Nbin)
+
+    #compute total background
+    self.grism_scene_noise = np.sqrt( self.grism_scene
+                                        + background.total_unif_noise
+                                        )
+
+    return 0
+
+
 #function to disperse a full scene with multiple objects overlapping in the direct imaging
-#It takes as input multi-dimentionnal "scene_direct", "scene_seg", and "spectra", each with non-overlapping sources/segmentations.
+#It takes as input multi-dimensionnal "scene_direct", "scene_seg", and "spectra", each with non-overlapping sources/segmentations.
 #Other inputs same as "observe_scene()".
 def observe_scene_multi_dim(self, scene_direct, scene_seg, spectra, grism_channel, exposure_time, image_fov=False, check=True):
 
     grism_scene_md = []
 
-    #loop over the dimantions
+    #loop over the dimensions
     for scene_direct_i, scene_seg_i, spectra_i in zip(scene_direct, scene_seg, spectra):
         #create scene for each dimension
         observe_scene(self, scene_direct_i, scene_seg_i, spectra_i, grism_channel, exposure_time, image_fov=image_fov, check=check)
@@ -310,5 +337,32 @@ def observe_scene_multi_dim(self, scene_direct, scene_seg, spectra, grism_channe
     
     self.grism_scene_multi_dim = np.sum(grism_scene_md, axis=0)
     
+    return 0
+
+
+#function to to get associated noise map of a full scene with multiple dimensions.
+def scene_noise_md(self, exposure_time=1000, filter="uv", Nreads=1, Nbin=1):
+    '''
+    Function to generate the total noise of a grism scene with multiple dimensions for a given integration time.
+
+    exposure_time
+        Exposure time in seconds.
+
+    Nreads: total number of read-outs (int).
+
+    Nbin: the number of detector pixels binned to one read-out pixel when on-chip binning is used (int).
+
+    '''
+
+    self.grism_scene_noise_multi_dim = np.zeros_like(self.grism_scene_multi_dim)
+
+    #compute the uniform background
+    background.tot_unif_noise(background, exposure_time=exposure_time, filter=filter, Nreads=Nreads, Nbin=Nbin)
+
+    #compute total background
+    self.grism_scene_noise_multi_dim = np.sqrt( self.grism_scene_multi_dim
+                                        + background.total_unif_noise
+                                        )
+
     return 0
 
