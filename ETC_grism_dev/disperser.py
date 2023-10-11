@@ -108,14 +108,14 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
     indices = [(r,c) for r,c in zip(r_i, c_i)]
 
     #Create grism box that will be populated as we disperse the source sprectum onto it.
-    margin_grism_profile = 10./100. #in percent
-    margin_grism_dispersion = 5./100. #in percent
+    margin_grism_profile = 0./100. #in percent
+    margin_grism_dispersion = 0./100. #in percent
     #spatial profile extent
     nb_rows_grism = nb_rows_img + int(np.nanmax(grism_psf_profile['col2']) + np.abs(np.nanmin(grism_psf_profile['col2'])))
     nb_rows_grism = nb_rows_grism + int(nb_rows_grism*margin_grism_profile)*2
     #dispersion direction extent
     nb_columns_grism = int(np.nanmax(grism_dispersion['col1']))
-    nb_columns_grism = nb_columns_grism + int(nb_columns_grism*margin_grism_dispersion)*2
+    nb_columns_grism = nb_columns_grism + nb_columns_img + int((nb_columns_grism+nb_columns_img)*margin_grism_dispersion)*2
     #create box
     self.grism_box = np.zeros((nb_rows_grism, nb_columns_grism))
 
@@ -206,8 +206,10 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
         y_stop = y_start + y_len_spectrum_spatial
         x_len_spectrum_spatial = len(spectrum_spatial[0])
         x_stop = x_indice+x_len_spectrum_spatial
-        #print(y_len_spectrum_spatial, y_stop, y_len_spectrum_spatial, y_indice)
-        #print(x_len_spectrum_spatial, x_stop, x_len_spectrum_spatial, x_indice)
+        #print("y:", y_len_spectrum_spatial, y_stop, y_len_spectrum_spatial, y_indice)
+        #print("x:", x_len_spectrum_spatial, x_stop, x_len_spectrum_spatial, x_indice)
+        #print("spectrum_spatial_scaled:", len(spectrum_spatial_scaled))
+        #print("y_start:y_stop, x_indice:x_stop", y_stop-y_start, x_stop-x_indice)
         #return grism_box, indice, spectrum_spatial
 
         self.grism_box[y_start:y_stop, x_indice:x_stop] += spectrum_spatial_scaled
@@ -226,7 +228,7 @@ def disperse(self, source_image=None, source_disperse_region=None, source_spectr
 
     if check:
         plt.figure()
-        plt.imshow(self.grism_box, aspect="auto", interpolation="none")
+        plt.imshow(self.grism_box, aspect="auto", interpolation="none", origin="lower")
         plt.colorbar(label='"On detector" Count Rate (e-/s)')
         plt.xlabel('Pixels (Dispersion direction)')
         plt.ylabel('Pixels (Spatial direction)')
@@ -240,13 +242,24 @@ def observe_scene(self, scene_direct, scene_seg, spectra, grism_channel, exposur
     
     #how many segmentation regions?
     seg_regions = np.unique(scene_seg[scene_seg>0])
-    
+
+    #check if sources and spectra match
+    if len(seg_regions) != len(spectra):
+        print("ERROR: NUMBER OF SOURCES (SEG REGIONS) AND SPECTRA DO NOT MATCH."
+                +" DOUBLE CHECK EACH SOURCE AS AN ASSOCIATED SPECTRUM."
+                +" ALTERNATIVELY, THERE MIGHT BE OVERLAPPING SEGMENTATION REGIONS IN THE IMAGE (IF A SINGLE DIRECT IMAGE IS USED),"
+                +" OR IN SOME OF THE LAYERS/DIMENSIONS (IF MULTIPLE DIMENSIONS ARE USED)."
+                +" MAKE SURE NO SEG REGIONS ARE OVERLAPPING IN EACH IMAGE.")
+        return "FAIL"
+
     #prepare grism scene
     fov_grism = scene_direct.shape[1]
-    #add 500 pixels in dispersion direction to fully disperse sources at the edge of the fov
+    #for fov_grism: double fov_direct to account for sources as large as entire fov (worst case scenario)
+    #and add 500 pixels to account for full grism dispersion.
     #can be trimmed back to original image fov after.
-    fov_grism = 500 + scene_direct.shape[1]
+    fov_grism = 2 * scene_direct.shape[1] + 500
     self.grism_scene = np.zeros([fov_grism, fov_grism])
+    print("FOV:", fov_grism)
     
     #loop over each segmentation region
     k=0
@@ -260,7 +273,7 @@ def observe_scene(self, scene_direct, scene_seg, spectra, grism_channel, exposur
         y_max = np.max(region_indexes[0])
         x_min = np.min(region_indexes[1])
         x_max = np.max(region_indexes[1])
-        box_seg = scene_seg[y_min:y_max+1, x_min:x_max+1]
+        box_seg = region[y_min:y_max+1, x_min:x_max+1]
         box_direct = scene_direct[y_min:y_max+1, x_min:x_max+1]
         
         if check==True:

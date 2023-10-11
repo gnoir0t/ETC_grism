@@ -34,8 +34,17 @@ Working version of the ETC available on google colab:
 
 	- v0.5.0 notebook showing full scene observation capabilities: https://github.com/gnoir0t/ETC_grism/tree/main/ETC_grism_notebooks/grism_etc_example_scene.ipynb
 
+	- v0.6.0 notebook: https://github.com/gnoir0t/ETC_grism/tree/main/ETC_grism_notebooks/grism_etc_example_scene_SNR.ipynb
+
+	- v0.7.0 notebook: https://github.com/gnoir0t/ETC_grism/tree/main/ETC_grism_notebooks/grism_etc_large_sources.ipynb
+
 --
 Change log:
+
+2023-10-11:
+v0.7.0
+Added capability to use arbitrary large sources when dispersing a single source, a full scene, or a scene with multiple dimensions.
+
 
 2023-10-10:
 v0.6.0
